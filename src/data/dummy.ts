@@ -1,5 +1,5 @@
 import type {
-  Group, Coach, Athlete, AttendanceRecord, ScheduleSlot,
+  Group, Coach, Athlete, AttendanceRecord, ScheduleSlot, ScheduleException,
   Payment, PaymentMethod, EquipmentItem, EquipmentAssignment, Competition,
 } from '../types'
 
@@ -147,20 +147,40 @@ const genAttendance = (): AttendanceRecord[] => {
 export const attendanceRecords: AttendanceRecord[] = genAttendance()
 
 // ─── Schedule ─────────────────────────────────────────────────────────────────
+// Each slot is a RECURRING weekly rule that applies across the whole season, so
+// there's no need to recreate events every week. effectiveFrom/Until bound the
+// term; individual occurrences can be cancelled via scheduleExceptions.
+const SEASON_FROM = '2025-09-01'
+const SEASON_UNTIL = '2026-06-30'
+const rule = (
+  id: string, groupId: string, day: number,
+  startTime: string, endTime: string, location: string,
+): ScheduleSlot => ({
+  id, groupId, day, startTime, endTime, location,
+  effectiveFrom: SEASON_FROM, effectiveUntil: SEASON_UNTIL,
+})
+
 export const scheduleSlots: ScheduleSlot[] = [
-  { id: 's1',  groupId: 'g1', day: 1, startTime: '16:00', endTime: '17:00', location: 'Mat Room A' },
-  { id: 's2',  groupId: 'g1', day: 3, startTime: '16:00', endTime: '17:00', location: 'Mat Room A' },
-  { id: 's3',  groupId: 'g2', day: 1, startTime: '17:00', endTime: '18:30', location: 'Mat Room A' },
-  { id: 's4',  groupId: 'g2', day: 3, startTime: '17:00', endTime: '18:30', location: 'Mat Room A' },
-  { id: 's5',  groupId: 'g2', day: 5, startTime: '10:00', endTime: '11:30', location: 'Mat Room B' },
-  { id: 's6',  groupId: 'g3', day: 1, startTime: '18:30', endTime: '20:00', location: 'Mat Room A' },
-  { id: 's7',  groupId: 'g3', day: 3, startTime: '18:30', endTime: '20:00', location: 'Mat Room A' },
-  { id: 's8',  groupId: 'g3', day: 5, startTime: '11:30', endTime: '13:00', location: 'Mat Room B' },
-  { id: 's9',  groupId: 'g4', day: 2, startTime: '18:00', endTime: '20:00', location: 'Mat Room A' },
-  { id: 's10', groupId: 'g4', day: 4, startTime: '18:00', endTime: '20:00', location: 'Mat Room A' },
-  { id: 's11', groupId: 'g5', day: 2, startTime: '20:00', endTime: '22:00', location: 'Mat Room A' },
-  { id: 's12', groupId: 'g5', day: 4, startTime: '20:00', endTime: '22:00', location: 'Mat Room A' },
-  { id: 's13', groupId: 'g5', day: 6, startTime: '09:00', endTime: '11:00', location: 'Mat Room A' },
+  rule('s1',  'g1', 1, '16:00', '17:00', 'Mat Room A'),
+  rule('s2',  'g1', 3, '16:00', '17:00', 'Mat Room A'),
+  rule('s3',  'g2', 1, '17:00', '18:30', 'Mat Room A'),
+  rule('s4',  'g2', 3, '17:00', '18:30', 'Mat Room A'),
+  rule('s5',  'g2', 5, '10:00', '11:30', 'Mat Room B'),
+  rule('s6',  'g3', 1, '18:30', '20:00', 'Mat Room A'),
+  rule('s7',  'g3', 3, '18:30', '20:00', 'Mat Room A'),
+  rule('s8',  'g3', 5, '11:30', '13:00', 'Mat Room B'),
+  rule('s9',  'g4', 2, '18:00', '20:00', 'Mat Room A'),
+  rule('s10', 'g4', 4, '18:00', '20:00', 'Mat Room A'),
+  rule('s11', 'g5', 2, '20:00', '22:00', 'Mat Room A'),
+  rule('s12', 'g5', 4, '20:00', '22:00', 'Mat Room A'),
+  rule('s13', 'g5', 6, '09:00', '11:00', 'Mat Room A'),
+]
+
+// Cancelled single occurrences (holidays, closures) — the rule stays intact.
+export const scheduleExceptions: ScheduleException[] = [
+  { slotId: 's1', date: '2026-01-01' }, // New Year's Day
+  { slotId: 's3', date: '2026-01-01' },
+  { slotId: 's6', date: '2026-01-01' },
 ]
 
 // ─── Payments ────────────────────────────────────────────────────────────────

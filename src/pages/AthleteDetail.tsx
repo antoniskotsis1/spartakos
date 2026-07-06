@@ -5,9 +5,10 @@ import { ArrowLeft, Phone, Mail, User, Calendar, Weight, Ruler, AlertTriangle, C
 import Badge from '../components/ui/Badge'
 import type { BadgeVariant } from '../types'
 import {
-  athletes, groups, attendanceRecords, payments,
+  athletes, groups, payments,
   equipmentAssignments, equipmentCatalog, competitions, MONTHLY_FEE_DEFAULT,
 } from '../data/dummy'
+import { useAttendance } from '../context/AttendanceContext'
 
 const groupById = Object.fromEntries(groups.map(g => [g.id, g]))
 const itemById = Object.fromEntries(equipmentCatalog.map(i => [i.id, i]))
@@ -19,6 +20,7 @@ export default function AthleteDetail() {
   const { id } = useParams<{ id: string }>()
   const athlete = athletes.find(a => a.id === id)
   const [tab, setTab] = useState<Tab>('Overview')
+  const { recordsForAthlete } = useAttendance()
 
   if (!athlete) {
     return (
@@ -32,7 +34,7 @@ export default function AthleteDetail() {
   const age = new Date().getFullYear() - new Date(athlete.dob).getFullYear()
   const athletePayments = payments.filter(p => p.athleteId === id).sort((a, b) => b.month.localeCompare(a.month))
   const athleteEquipment = equipmentAssignments.filter(e => e.athleteId === id)
-  const athleteAttendance = attendanceRecords.filter(r => r.athleteId === id)
+  const athleteAttendance = recordsForAthlete(id ?? '')
   const athleteCompetitions = competitions.filter(c => c.results.some(r => r.athleteId === id))
 
   const attendanceRate = useMemo(() => {

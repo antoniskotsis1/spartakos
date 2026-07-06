@@ -49,7 +49,34 @@ export interface ScheduleSlot {
   startTime: string
   endTime: string
   location: string
+  /** ISO date (yyyy-MM-dd) the recurring rule starts applying. */
+  effectiveFrom: string
+  /** ISO date (yyyy-MM-dd) the recurring rule stops, or null for open-ended. */
+  effectiveUntil: string | null
 }
+
+/** A single cancelled occurrence of a recurring slot (e.g. a public holiday). */
+export interface ScheduleException {
+  slotId: string
+  /** ISO date (yyyy-MM-dd) of the cancelled occurrence. */
+  date: string
+}
+
+/** A concrete occurrence of a slot on a specific calendar date (generated, not stored). */
+export interface SessionInstance {
+  /** `${slotId}__${date}` */
+  id: string
+  slotId: string
+  groupId: string
+  /** yyyy-MM-dd */
+  date: string
+  startTime: string
+  endTime: string
+  location: string
+  canceled: boolean
+}
+
+export type AttendanceStatus = 'present' | 'absent'
 
 export type PaymentMethod = 'cash' | 'bank transfer' | 'card'
 
