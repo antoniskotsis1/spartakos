@@ -6,9 +6,10 @@ import StatCard from '../components/ui/StatCard'
 import Badge from '../components/ui/Badge'
 import type { BadgeVariant } from '../types'
 import {
-  athletes, groups, payments, attendanceRecords,
+  athletes, groups, payments,
   competitions, MONTHLY_FEE_DEFAULT,
 } from '../data/dummy'
+import { useAttendance } from '../context/AttendanceContext'
 
 const CURRENT_MONTH = '2026-06'
 
@@ -19,6 +20,7 @@ const MEDAL_COLOR_MAP: Record<'gold' | 'silver' | 'bronze', BadgeVariant> = {
 }
 
 export default function Dashboard() {
+  const { all: attendanceRecords } = useAttendance()
   const activeAthletes = athletes.filter(a => a.active)
 
   const monthPayments = payments.filter(p => p.month === CURRENT_MONTH)
@@ -37,7 +39,7 @@ export default function Dashboard() {
       const rate = totalSessions > 0 ? Math.round((presentSessions / totalSessions) * 100) : 0
       return { name: g.name, rate, athletes: groupAthletes.length, color: g.color }
     })
-  }, [activeAthletes])
+  }, [activeAthletes, attendanceRecords])
 
   // Revenue last 6 months
   const revenueData = useMemo(() => {
